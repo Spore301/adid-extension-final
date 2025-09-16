@@ -28,6 +28,10 @@ const LoginForm = ({ onLoginSuccess }) => {
 
   return (
     <div className="form-container">
+      <div className="branding">
+          <img src="/icons/logo.svg" alt="ADID Logo" className="logo" />
+          <span className="company-name">ADID Taskmanager</span>
+      </div>
       <h3>Welcome Back!</h3>
       <p className="subtitle">Enter your details to log in.</p>
       <form onSubmit={handleSubmit}>
