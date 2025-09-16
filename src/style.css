@@ -342,6 +342,27 @@ body.dark .header { background-color: #1f2937; border-color: #374151; }
   margin-bottom: 20px;
 }
 
+
+/* Add these new rules for the password icon */
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  padding-right: 40px; /* Make space for the icon */
+}
+
+.password-toggle-icon {
+  position: absolute;
+  right: 12px;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+
 /* .form-container .logo{
   height: 40px;
   width: 40px;

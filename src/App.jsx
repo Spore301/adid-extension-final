@@ -7,7 +7,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check for a logged-in user and theme when the popup opens
+  // This hook now safely checks for a user and theme
   useEffect(() => {
     chrome.storage.local.get(['user', 'theme'], (result) => {
       // Set user if found in storage
@@ -15,13 +15,14 @@ function App() {
         setUser(result.user);
       }
       
-      // Apply theme from storage
+      // Apply theme from storage, regardless of login state
       if (result.theme === 'dark') {
         document.body.classList.add('dark');
       } else {
         document.body.classList.remove('dark');
       }
 
+      // We are done loading
       setIsLoading(false);
     });
   }, []);
@@ -39,20 +40,20 @@ function App() {
   };
 
   if (isLoading) {
-    return <div className="app-container loading"><h2>Loading...</h2></div>;
+    return <div className="loading-container"><h2>Loading...</h2></div>;
   }
   
   return (
-    <div>
+    <>
       <Toaster />
       {user ? (
         <TaskListView user={user} onLogout={handleLogout} />
       ) : (
-        <div className="app-container">
+        <div className="login-form-wrapper">
           <LoginForm onLoginSuccess={handleLoginSuccess} />
         </div>
       )}
-    </div>
+    </>
   );
 }
 
