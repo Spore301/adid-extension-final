@@ -139,6 +139,19 @@ const TaskCard = ({ task, onChecklistToggle }) => { // Added onChecklistToggle p
           ) : <p className="no-checklist">No checklist items.</p>}
         </div>
       )}
+      <div className="expanded-content">
+          <h5 className="checklist-title">Checklist</h5>
+          {/* ... (checklist ul is unchanged) ... */}
+          
+          {/* --- Add these new sections --- */}
+          <TimeLogList taskId={task._id} />
+          <RemarksSection 
+            taskId={task._id} 
+            remarks={task.remarks} 
+            onRemarkAdded={onRemarkAdded} 
+            currentUser={currentUser}
+          />
+        </div>
 
       <div className="card-footer">
         <div className="date-container">
@@ -158,6 +171,7 @@ const TaskCard = ({ task, onChecklistToggle }) => { // Added onChecklistToggle p
         </div>
       </div>
     </div>
+    
   );
 };
 

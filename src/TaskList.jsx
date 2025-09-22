@@ -14,6 +14,8 @@ const TaskList = ({ tasks, isLoading, error, onChecklistToggle }) => {
           task={task} 
           // Pass the handler down to the card
           onChecklistToggle={onChecklistToggle} 
+          onRemarkAdded={onRemarkAdded} // Pass it through
+          currentUser={currentUser}
         />
       ))}
     </div>

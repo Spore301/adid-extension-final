@@ -86,6 +86,13 @@ const TaskListView = ({ user, onLogout }) => {
       );
     }
   }, [tasks, user.token]);
+
+  // This is the function that was missing
+  const handleTaskUpdate = (updatedTask) => {
+    setTasks(currentTasks => 
+      currentTasks.map(t => t._id === updatedTask._id ? updatedTask : t)
+    );
+  };
   
   const statusCounts = useMemo(() => {
     const filteredByProject = selectedProject === 'all'
@@ -121,6 +128,8 @@ const TaskListView = ({ user, onLogout }) => {
         isLoading={isLoading} 
         error={error} 
         onChecklistToggle={handleChecklistToggle} 
+        onRemarkAdded={handleTaskUpdate} // Pass the function as onRemarkAdded
+        currentUser={user}
       />
     </div>
   );

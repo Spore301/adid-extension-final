@@ -371,3 +371,35 @@ body.dark .header { background-color: #1f2937; border-color: #374151; }
   font-size: 1.5rem;
 } */
 /* ... (The rest of the dark mode styles are the same) ... */
+
+
+/* --- TimeLog & Remarks Styles --- */
+.section-title {
+  font-weight: 600;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #374151;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 16px;
+}
+.empty-state { font-size: 0.85rem; color: #6b7280; }
+.timelog-list { list-style: none; padding: 0; margin: 0; }
+.timelog-item { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid #f3f4f6; }
+.timelog-user { font-weight: 500; }
+.timelog-time { color: #6b7280; }
+.remarks-list { display: flex; flex-direction: column; gap: 12px; }
+.remark-item { display: flex; gap: 10px; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; }
+.remark-content { display: flex; flex-direction: column; }
+.remark-user { font-weight: 600; font-size: 0.85rem; }
+.remark-text { margin: 2px 0 0 0; font-size: 0.9rem; white-space: pre-wrap; }
+.remark-form { display: flex; gap: 8px; margin-top: 16px; }
+.remark-input { flex-grow: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; }
+.remark-submit-btn { padding: 8px 16px; border: none; background-color: #1368EC; color: white; border-radius: 6px; cursor: pointer; }
+
+/* --- Dark Mode for New Components --- */
+body.dark .section-title { color: #d1d5db; border-top-color: #374151; }
+body.dark .empty-state, body.dark .timelog-time { color: #9ca3af; }
+body.dark .timelog-item { border-bottom-color: #374151; }
+body.dark .remark-input { background-color: #374151; border-color: #4b5563; color: #d1d5db; }
+body.dark .remark-submit-btn { background-color: #2563eb; }
