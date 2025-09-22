@@ -371,3 +371,15 @@ body.dark .header { background-color: #1f2937; border-color: #374151; }
   font-size: 1.5rem;
 } */
 /* ... (The rest of the dark mode styles are the same) ... */
+
+/* 1) For Firefox */
+* {
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;    /* IE 10+ / Edge Legacy */
+}
+
+/* 2) For WebKit (Chrome/Safari/Edge Chromium) */
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
