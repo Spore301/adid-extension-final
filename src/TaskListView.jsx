@@ -2,10 +2,9 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { apiClient } from './api';
 import { API_PATHS, BASE_URL } from './utils/apiPaths';
 import Header from './components/Header';
-import ProjectFilter from './components/ProjectFilter';
-import StatusPills from './components/StatusPills';
 import TaskList from './TaskList';
 import toast from 'react-hot-toast';
+import MusicPlayer from './components/MusicPlayer';
 
 const addToOfflineQueue = async (url, method, body, token) => {
   const { requestQueue = [] } = await chrome.storage.local.get('requestQueue');
@@ -53,7 +52,6 @@ const TaskListView = ({ user, onLogout }) => {
   }, [fetchData]);
 
   const handleChecklistToggle = useCallback(async (taskId, todoItemId) => {
-    const originalTasks = tasks;
     const newTasks = tasks.map(task => {
       if (task._id === taskId) {
         const newChecklist = task.todoChecklist.map(item => 
@@ -75,7 +73,6 @@ const TaskListView = ({ user, onLogout }) => {
         currentTasks.map(t => t._id === taskId ? response.task : t)
       );
     } catch (err) {
-      console.error("API call failed, likely offline:", err);
       toast.error("You're offline. Change saved and will sync later.");
       const taskToUpdate = newTasks.find(t => t._id === taskId);
       await addToOfflineQueue(
@@ -87,12 +84,42 @@ const TaskListView = ({ user, onLogout }) => {
     }
   }, [tasks, user.token]);
 
-  // This is the function that was missing
-  const handleTaskUpdate = (updatedTask) => {
+  const handleRemarkAdded = useCallback(async (taskId, remarkText) => {
+    const tempRemarkId = `temp_${Date.now()}`;
+    
     setTasks(currentTasks => 
-      currentTasks.map(t => t._id === updatedTask._id ? updatedTask : t)
+      currentTasks.map(task => {
+        if (task._id === taskId) {
+          return {
+            ...task,
+            remarks: [
+              ...(task.remarks || []), 
+              { _id: tempRemarkId, text: remarkText, madeBy: user }
+            ]
+          };
+        }
+        return task;
+      })
     );
-  };
+    
+    try {
+      const response = await apiClient.addRemarkToTask(taskId, { 
+        text: remarkText, 
+        madeBy: user._id 
+      });
+      setTasks(currentTasks => 
+        currentTasks.map(t => (t._id === taskId ? response.task : t))
+      );
+    } catch (err) {
+      toast.error("You're offline. Comment saved and will sync later.");
+      await addToOfflineQueue(
+        API_PATHS.TASKS.ADD_REMARK(taskId),
+        'POST',
+        { text: remarkText, madeBy: user._id },
+        user.token
+      );
+    }
+  }, [tasks, user]);
   
   const statusCounts = useMemo(() => {
     const filteredByProject = selectedProject === 'all'
@@ -123,14 +150,19 @@ const TaskListView = ({ user, onLogout }) => {
         selectedStatus={selectedStatus}
         onStatusChange={setSelectedStatus}
       />
-      <TaskList 
-        tasks={filteredTasks} 
-        isLoading={isLoading} 
-        error={error} 
-        onChecklistToggle={handleChecklistToggle} 
-        onRemarkAdded={handleTaskUpdate} // Pass the function as onRemarkAdded
-        currentUser={user}
-      />
+      <MusicPlayer />
+      <div className="task-list-scroll-container">
+        <TaskList 
+          tasks={filteredTasks} 
+          isLoading={isLoading} 
+          error={error} 
+          onChecklistToggle={handleChecklistToggle} 
+          onRemarkAdded={handleRemarkAdded}
+          currentUser={user}
+        />
+      </div>
+
+      
     </div>
   );
 };

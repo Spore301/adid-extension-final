@@ -16,8 +16,10 @@ const Header = ({
     <div className="header">
       <div className="top-bar">
         <div className="branding">
-          <img src="/icons/logo.svg" alt="ADID Logo" className="logo" />
-          <span className="company-name">ADID Taskmanager</span>
+          <a className="branding" href="https://adid-taskmanager.onrender.com" target="_blank" rel="noopener noreferrer">
+            <img src="/icons/logo.svg" alt="ADID Logo" className="logo" />
+            <span className="company-name">ADID Taskmanager</span>
+          </a>
         </div>
         <div className="user-info">
           <span className="user-name">{user.name}</span>

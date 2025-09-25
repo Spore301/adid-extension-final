@@ -8,35 +8,38 @@
   <div class="container">
     <h1>Settings</h1>
 
-    <div class="setting-card">
-      <h2>Backend Environment</h2>
-      <p>Select which server the extension should connect to.</p>
+    <div class="setting-group">
+      <h2>Backend Server</h2>
       <div class="radio-group">
         <label>
-          <input type="radio" name="backend" value="http://192.168.1.5:8000">
+          <input type="radio" name="backend" value="http://localhost:5000">
           Development (Local)
         </label>
         <label>
           <input type="radio" name="backend" value="https://adid-task-manager.onrender.com">
-          Production (Live)
+          Production (Render)
         </label>
-      </div>
+         </div>
     </div>
-
-    <div class="setting-card">
-      <h2>Appearance</h2>
-      <p>Choose your preferred theme.</p>
-      <div class="toggle-switch">
-        <label class="switch">
-          <input type="checkbox" id="theme-toggle">
-          <span class="slider round"></span>
+    
+    <div class="setting-group">
+      <h2>Music Service</h2>
+      <div class="radio-group">
+        <label>
+          <input type="radio" name="music_backend" value="http://localhost:5001">
+          Local Music Service
         </label>
-        <label for="theme-toggle" id="theme-label">Light Mode</label>
+        <label>
+          <input type="radio" name="music_backend" value="https://your-music-backend.vercel.app"> Production Music Service
+        </label>
       </div>
     </div>
     
     <div id="status"></div>
+    
   </div>
+  
+
   <script src="options.js"></script>
 </body>
 </html>

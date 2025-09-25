@@ -1,10 +1,13 @@
 import React from 'react';
 import TaskCard from './components/TaskCard';
+import Loader from './components/Loader'; // 1. Import the new component
 
-// Accept onChecklistToggle as a prop
-const TaskList = ({ tasks, isLoading, error, onChecklistToggle }) => {
-  if (isLoading) return <p>Loading tasks...</p>;
-  // ... (error and empty states)
+const TaskList = ({ tasks, isLoading, error, onChecklistToggle, onRemarkAdded, currentUser }) => {
+  // 2. Use the Loader component here
+  if (isLoading) return <Loader />; 
+  
+  if (error) return <p className="error-message">Error: {error}</p>;
+  if (!tasks || tasks.length === 0) return <p>No tasks found.</p>;
 
   return (
     <div className="task-list-grid">
@@ -12,9 +15,8 @@ const TaskList = ({ tasks, isLoading, error, onChecklistToggle }) => {
         <TaskCard 
           key={task._id} 
           task={task} 
-          // Pass the handler down to the card
           onChecklistToggle={onChecklistToggle} 
-          onRemarkAdded={onRemarkAdded} // Pass it through
+          onRemarkAdded={onRemarkAdded}
           currentUser={currentUser}
         />
       ))}

@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { apiClient } from '../api';
-import { API_PATHS } from '../utils/apiPaths';
 import { FaPlayCircle, FaPauseCircle } from 'react-icons/fa';
 import { LuClipboardCheck, LuSquare } from 'react-icons/lu';
 import toast from 'react-hot-toast';
+
+// --- START: ADD THESE IMPORTS ---
+import TimeLogList from './TaskLogList';
+import RemarksSection from './RemarksSection';
+// --- END: ADD THESE IMPORTS ---
 
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A';
@@ -21,70 +24,58 @@ const formatDuration = (ms) => {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
-const TaskCard = ({ task, onChecklistToggle }) => { // Added onChecklistToggle prop
+const TaskCard = ({ task, onChecklistToggle, onRemarkAdded, currentUser }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isTimerActive, setIsTimerActive] = useState(false);
-  const [activeTimeLogId, setActiveTimeLogId] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const timerIntervalRef = useRef(null);
 
   const startTicking = (startTime) => {
     clearInterval(timerIntervalRef.current);
-    const startTimeMs = new Date(startTime).getTime();
     timerIntervalRef.current = setInterval(() => {
-      setElapsedTime(Date.now() - startTimeMs);
+      setElapsedTime(Date.now() - new Date(startTime).getTime());
     }, 1000);
   };
 
   useEffect(() => {
-    const checkActiveTimer = async () => {
-      try {
-        const response = await apiClient.get(API_PATHS.TASKS.GET_ACTIVE_TIMER(task._id));
-        if (response.activeTimeLog) {
-          setIsTimerActive(true);
-          setActiveTimeLogId(response.activeTimeLog._id);
-          startTicking(response.activeTimeLog.startTime);
+    // Check if chrome.runtime is available before sending a message
+    if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+      chrome.runtime.sendMessage(
+        { action: "getTimerState", taskId: task._id },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error(chrome.runtime.lastError.message);
+            return;
+          }
+          if (response && response.isTimerActive) {
+            setIsTimerActive(true);
+            startTicking(response.startTime);
+          }
         }
-      } catch (error) {
-        console.log(`No active timer for task: ${task.title}`);
-      }
-    };
-    checkActiveTimer();
+      );
+    }
     return () => clearInterval(timerIntervalRef.current);
-  }, [task._id, task.title]);
+  }, [task._id]);
 
-  const handleTimerClick = async (e) => {
+  const handleTimerClick = (e) => {
     e.stopPropagation();
-    if (isTimerActive) {
-      if (!activeTimeLogId) return toast.error("Timer log ID not found.");
-      try {
-        await apiClient.put(API_PATHS.TASKS.STOP_TIMER(task._id, activeTimeLogId));
-        setIsTimerActive(false);
-        setActiveTimeLogId(null);
-        clearInterval(timerIntervalRef.current);
-        setElapsedTime(0);
-        toast.success("Timer stopped!");
-      } catch (error) {
-        toast.error(error.message || "Failed to stop timer.");
-      }
-    } else {
-      try {
-        const response = await apiClient.post(API_PATHS.TASKS.START_TIMER(task._id));
-        setIsTimerActive(true);
-        setActiveTimeLogId(response.timeLog._id);
-        startTicking(response.timeLog.startTime);
-        toast.success("Timer started!");
-      } catch (error) {
-        toast.error(error.message || "Failed to start timer.");
-      }
+    if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+        if (isTimerActive) {
+          chrome.runtime.sendMessage({ action: "stopTimer", task, token: currentUser.token });
+          setIsTimerActive(false);
+          clearInterval(timerIntervalRef.current);
+          setElapsedTime(0);
+          toast.success("Timer stopped!");
+        } else {
+          chrome.runtime.sendMessage({ action: "startTimer", task, token: currentUser.token });
+          setIsTimerActive(true);
+          startTicking(Date.now());
+          toast.success("Timer started!");
+        }
     }
   };
   
-  const {
-    title, project, status, priority, progress = 0, dueDate,
-    createdAt, todoChecklist = [], isOverdue,
-  } = task;
-
+  const { title, project, status, priority, progress = 0, dueDate, createdAt, todoChecklist = [], remarks = [], isOverdue } = task;
   const completedTodoCount = todoChecklist.filter(item => item.completed).length;
 
   const getStatusTagColor = () => {
@@ -106,15 +97,11 @@ const TaskCard = ({ task, onChecklistToggle }) => { // Added onChecklistToggle p
         <span className={getStatusTagColor()}>{status}</span>
         <span className={getPriorityTagColor()}>{priority}</span>
       </div>
-
       {project?.name && <p className="project-name">{project.name}</p>}
       <h4 className="task-title">{title}</h4>
-
       <div className="progress-container">
         <p>Task Done: {completedTodoCount}/{todoChecklist.length}</p>
-        <div className="progress-bar-background">
-          <div className="progress-bar-foreground" style={{ width: `${progress}%` }}></div>
-        </div>
+        <div className="progress-bar-background"><div className="progress-bar-foreground" style={{ width: `${progress}%` }}></div></div>
       </div>
 
       {isExpanded && (
@@ -123,55 +110,30 @@ const TaskCard = ({ task, onChecklistToggle }) => { // Added onChecklistToggle p
           {todoChecklist.length > 0 ? (
             <ul className="checklist">
               {todoChecklist.map((item) => (
-                <li 
-                  key={item._id} 
-                  className="checklist-item" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onChecklistToggle(task._id, item._id);
-                  }}
-                >
+                <li key={item._id} className="checklist-item" onClick={(e) => { e.stopPropagation(); onChecklistToggle(task._id, item._id); }}>
                   {item.completed ? <LuClipboardCheck className="check-icon completed" /> : <LuSquare className="check-icon" />}
                   <span className={item.completed ? 'completed-text' : ''}>{item.text}</span>
                 </li>
               ))}
             </ul>
           ) : <p className="no-checklist">No checklist items.</p>}
+
+          <TimeLogList taskId={task._id} />
+          <RemarksSection taskId={task._id} remarks={remarks} onRemarkAdded={onRemarkAdded} currentUser={currentUser} />
         </div>
       )}
-      <div className="expanded-content">
-          <h5 className="checklist-title">Checklist</h5>
-          {/* ... (checklist ul is unchanged) ... */}
-          
-          {/* --- Add these new sections --- */}
-          <TimeLogList taskId={task._id} />
-          <RemarksSection 
-            taskId={task._id} 
-            remarks={task.remarks} 
-            onRemarkAdded={onRemarkAdded} 
-            currentUser={currentUser}
-          />
-        </div>
 
       <div className="card-footer">
         <div className="date-container">
           <div><label>Start Date</label><p>{formatDate(createdAt)}</p></div>
           <div><label>Due Date</label><p>{formatDate(dueDate)}</p></div>
         </div>
-        
         <div className="timer-controls" onClick={handleTimerClick}>
-          {isTimerActive && (
-            <span className="timer-display">{formatDuration(elapsedTime)}</span>
-          )}
-          {isTimerActive ? (
-            <FaPauseCircle className="timer-icon stop" />
-          ) : (
-            <FaPlayCircle className="timer-icon play" />
-          )}
+          {isTimerActive && <span className="timer-display">{formatDuration(elapsedTime)}</span>}
+          {isTimerActive ? <FaPauseCircle className="timer-icon stop" /> : <FaPlayCircle className="timer-icon play" />}
         </div>
       </div>
     </div>
-    
   );
 };
 

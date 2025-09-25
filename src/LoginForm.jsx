@@ -22,7 +22,6 @@ const LoginForm = ({ onLoginSuccess }) => {
       const userData = await loginUser(email, password);
       onLoginSuccess(userData);
     } catch (err) {
-      // --- This is the new logic ---
       if (err.message === 'SERVER_ASLEEP') {
         setError("Server is waking up... Please try again in 30 seconds.");
       } else {
@@ -42,7 +41,21 @@ const LoginForm = ({ onLoginSuccess }) => {
       <h3>Welcome Back!</h3>
       <p className="subtitle">Enter your details to log in.</p>
       <form onSubmit={handleSubmit}>
-        {/* ... (email input group is unchanged) ... */}
+        
+        {/* --- Email Input Group --- */}
+        <div className="input-group">
+          <label htmlFor="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="name@example.com"
+            disabled={isLoading}
+          />
+        </div>
+        
+        {/* --- Password Input Group --- */}
         <div className="input-group">
           <label htmlFor="password">Password</label>
           <div className="password-input-wrapper">
