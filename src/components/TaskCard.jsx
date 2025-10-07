@@ -65,11 +65,13 @@ const TaskCard = ({ task, onChecklistToggle, onRemarkAdded, currentUser }) => {
           setIsTimerActive(false);
           clearInterval(timerIntervalRef.current);
           setElapsedTime(0);
+          onTimerStateChange(task._id, false); // Notify parent that timer stopped
           toast.success("Timer stopped!");
         } else {
           chrome.runtime.sendMessage({ action: "startTimer", task, token: currentUser.token });
           setIsTimerActive(true);
           startTicking(Date.now());
+          onTimerStateChange(task._id, true); // Notify parent that timer started
           toast.success("Timer started!");
         }
     }

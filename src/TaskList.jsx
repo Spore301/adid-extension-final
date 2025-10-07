@@ -18,6 +18,7 @@ const TaskList = ({ tasks, isLoading, error, onChecklistToggle, onRemarkAdded, c
           onChecklistToggle={onChecklistToggle} 
           onRemarkAdded={onRemarkAdded}
           currentUser={currentUser}
+          onTimerStateChange={onTimerStateChange} // Pass it down
         />
       ))}
     </div>

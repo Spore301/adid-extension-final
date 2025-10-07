@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { loginUser } from './api';
-import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 
 const LoginForm = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,8 +39,6 @@ const LoginForm = ({ onLoginSuccess }) => {
       <h3>Welcome Back!</h3>
       <p className="subtitle">Enter your details to log in.</p>
       <form onSubmit={handleSubmit}>
-        
-        {/* --- Email Input Group --- */}
         <div className="input-group">
           <label htmlFor="email">Email Address</label>
           <input
@@ -54,23 +50,16 @@ const LoginForm = ({ onLoginSuccess }) => {
             disabled={isLoading}
           />
         </div>
-        
-        {/* --- Password Input Group --- */}
         <div className="input-group">
           <label htmlFor="password">Password</label>
-          <div className="password-input-wrapper">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              disabled={isLoading}
-            />
-            <span className="password-toggle-icon" onClick={() => setShowPassword(!showPassword)}>
-              {showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
-            </span>
-          </div>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+            disabled={isLoading}
+          />
         </div>
 
         {error && <p className="error-message">{error}</p>}
